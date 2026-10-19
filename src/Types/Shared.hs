@@ -1,6 +1,6 @@
 module Types.Shared
   ( Plantation (..)
-  , Index
+  , Index (..)
   , Error (..)
   , Update
   , Role(..)

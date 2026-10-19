@@ -1,7 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Types.Player
-  ( Player
-  , PlayerBoard
+  ( Player (..)
+  , PlayerBoard (..)
   , board
   , plantations
   , buildings

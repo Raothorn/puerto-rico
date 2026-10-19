@@ -62,4 +62,5 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
+    - HUnit
     - puerto-rico

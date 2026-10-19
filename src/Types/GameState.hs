@@ -2,7 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Types.GameState
-  ( GameState,
+  ( GameState (..),
     GamePhase (..),
     -- Lenses
     phase,
