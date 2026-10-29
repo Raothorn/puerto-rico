@@ -29,6 +29,8 @@ library
       Lib
       StateUpdates
       Types
+      Types.Action
+      Types.Error
       Types.GameState
       Types.LogEvent
       Types.Player
