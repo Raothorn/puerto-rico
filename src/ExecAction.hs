@@ -3,61 +3,52 @@ module ExecAction
   )
 where
 
-import Control.Monad
-import Lens.Micro
-import Lens.Micro.Mtl
+import Control.Monad (unless)
+import Lens.Micro.Mtl (use, zoom)
 
 import StateUpdates
 import Types
 import Util
 
 execAction :: Action -> Update GameState ()
-execAction (ChooseRoleAction role) = do
-  -- TODO
-  return ()
-execAction (RoleAction action) = do
-  curPhase <- popPhase
-  -- Check Valid Phase
-  (role, remainingPlayers) <- case curPhase of
-    RoleActionPhase r rp -> return (r, rp)
+execAction (ChooseRoleAction _) = do
+  -- TODO: Implement role selection.
+  pure ()
+execAction (RoleAction roleAction) = do
+  currentPhase <- popPhase
+  (role, remainingPlayerIndices) <- case currentPhase of
+    RoleActionPhase currentRole playerIndices -> pure (currentRole, playerIndices)
     _ -> liftErr WrongPhase
 
   numPlayers <- use numPlayersL
-  let hasPrivilege = length remainingPlayers == numPlayers
-  (curPlayer, remainingPlayers') <- case remainingPlayers of
+  let hasPrivilege = length remainingPlayerIndices == numPlayers
+  (playerIndex, remainingPlayerIndices') <- case remainingPlayerIndices of
     [] -> liftErr NoRemainingPlayers
-    x : xs -> return (x, xs)
+    nextPlayerIndex : otherPlayerIndices -> pure (nextPlayerIndex, otherPlayerIndices)
 
-  execRoleAction curPlayer hasPrivilege action
+  execRoleAction playerIndex hasPrivilege roleAction
 
-  if null remainingPlayers'
-    then return () -- Phase is already popped, ChooseRoleAction should be the current phase
-    else pushPhase $ RoleActionPhase role remainingPlayers'
+  if null remainingPlayerIndices'
+    -- The role phase has been popped, exposing the next phase on the stack.
+    then pure ()
+    else pushPhase $ RoleActionPhase role remainingPlayerIndices'
 
-execRoleAction :: (Index Player) -> Bool -> RoleAction -> Update GameState ()
---------------------
--- SETTLER ACTION --
---------------------
-execRoleAction curPlayer hasPrivilege (SettlerAction action) = do
-  tile <- case action of
+-- | Execute a player's role action with the supplied privilege status.
+execRoleAction :: Index Player -> Bool -> RoleAction -> Update GameState ()
+execRoleAction playerIndex hasPrivilege (SettlerAction settlerAction) = do
+  tile <- case settlerAction of
     TakeQuarryAction -> do
-      when (not hasPrivilege) $ liftErr NoPrivilege
+      unless hasPrivilege $ liftErr NoPrivilege
       takeQuarry
-    TakePlantationAction plantationIx -> takePlantation plantationIx
+    TakePlantationAction plantationIndex -> takePlantation plantationIndex
   rules <- use rulesL
-  zoom (playerL curPlayer) $ placeTile rules tile
+  zoom (playerL playerIndex) $ placeTile rules tile
 
-------------------
--- Mayor Action --
-------------------
-execRoleAction pIx _ MayorAction = do
-  -- TODO
-  return ()
+execRoleAction _ _ MayorAction = do
+  -- TODO: Implement the mayor action.
+  pure ()
 
------------
--- TITLE --
------------
-execRoleAction pIx _ _ = logEvent NoEvent
+execRoleAction _ _ OptOut = logEvent NoEvent
 
 getRoleFromAction :: RoleAction -> Role
 getRoleFromAction (SettlerAction _) = Settler

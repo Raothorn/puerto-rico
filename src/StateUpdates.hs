@@ -7,32 +7,35 @@ module StateUpdates
   )
 where
 
-import Control.Monad
-import Lens.Micro
-import Lens.Micro.Mtl
+import Control.Monad (when)
+import Lens.Micro (to, (^.))
+import Lens.Micro.Mtl (preuse, use, (%=), (-=), (.=))
 
 import Types
 import Util
 
+-- | Remove a quarry from the stack, failing when the stack is empty.
 takeQuarry :: Update GameState Tile
 takeQuarry = do
-  quarries <- use quarryStack
-  when (quarries <= 0) $
+  numQuarries <- use quarryStack
+  when (numQuarries <= 0) $
     liftErr StackEmpty
 
   quarryStack -= 1
 
-  return QuarryTile
+  pure QuarryTile
 
+-- | Take a face-up plantation and leave its slot empty.
 takePlantation :: Index Plantation -> Update GameState Tile
-takePlantation plantationIx = do
-  chosenPlantation <-
-    preuse (plantationL plantationIx)
-      >>= (liftMaybe InvalidPlantationIndex) -- invalid traversal
-      >>= (liftMaybe InvalidPlantationIndex) -- no plantation in chosen slot
-  plantationL plantationIx .= Nothing
-  return (PlantationTile chosenPlantation)
+takePlantation plantationIndex = do
+  plantation <-
+    preuse (plantationL plantationIndex)
+      >>= liftMaybe InvalidPlantationIndex -- invalid traversal
+      >>= liftMaybe InvalidPlantationIndex -- no plantation in chosen slot
+  plantationL plantationIndex .= Nothing
+  pure (PlantationTile plantation)
 
+-- | Place a tile on a player's board if there is an available slot.
 placeTile :: GameRules -> Tile -> Update Player ()
 placeTile rules tile = do
   let maxTiles = rules ^. numTileSlots
@@ -40,14 +43,16 @@ placeTile rules tile = do
   when (numTiles >= maxTiles) $ liftErr BoardTilesFull
   tiles %= (tile :)
 
+-- | Remove and return the current phase, failing when the stack is empty.
 popPhase :: Update GameState GamePhase
 popPhase = do
-  curPhaseStack <- use phaseStack
-  case curPhaseStack of
+  currentPhaseStack <- use phaseStack
+  case currentPhaseStack of
     [] -> liftErr EmptyPhaseStack
-    p : ps -> do
-      phaseStack .= ps
-      return p
+    currentPhase : remainingPhases -> do
+      phaseStack .= remainingPhases
+      pure currentPhase
 
+-- | Make a phase the current phase by pushing it onto the stack.
 pushPhase :: GamePhase -> Update GameState ()
 pushPhase phase = phaseStack %= (phase :)

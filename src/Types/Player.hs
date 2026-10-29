@@ -4,18 +4,18 @@ module Types.Player
   ( Player
   , tiles
   , buildings
-  , dubloons
+  , doubloons
   )
 where
 
-import Lens.Micro.TH
+import Lens.Micro.TH (makeLenses)
 
 import Types.Shared
 
 data Player = Player
   { _tiles :: [Tile]
   , _buildings :: [Index Building]
-  , _dubloons :: Int
+  , _doubloons :: Int
   }
 
 data Building

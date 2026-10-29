@@ -5,30 +5,32 @@ module Util
   , liftMaybe
   , useMaybe
   , logEvent
-  ) where
+  )
+where
 
-import Control.Monad.Trans.Class
-import Lens.Micro
-import Lens.Micro.Mtl
+import Control.Monad.Trans.Class (lift)
+import Lens.Micro (Lens')
+import Lens.Micro.Mtl (use, (%=))
 
 import Types
 
-----------
--- Util --
-----------
+-- | Fail an update with the supplied error.
 liftErr :: Error -> Update s a
 liftErr = lift . Left
 
+-- | Unwrap a value, failing the update when it is absent.
 liftMaybe :: Error -> Maybe a -> Update s a
-liftMaybe err x =
-  case x of
-    Just v -> return v
+liftMaybe err maybeValue =
+  case maybeValue of
+    Just value -> pure value
     Nothing -> liftErr err
 
+-- | Read an optional value through a lens, failing when it is absent.
 useMaybe :: Error -> Lens' s (Maybe a) -> Update s a
-useMaybe err l = do
-  x <- use l
-  liftMaybe err x
+useMaybe err valueLens = do
+  maybeValue <- use valueLens
+  liftMaybe err maybeValue
 
+-- | Prepend an event to the game log.
 logEvent :: LogEvent -> Update GameState ()
 logEvent event = eventLog %= (event :)

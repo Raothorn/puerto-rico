@@ -1,13 +1,11 @@
-{-# LANGUAGE RankNTypes #-}
-
 module Types
-  ( module Types.Shared
-  , module Types.Action
+  ( module Types.Action
   , module Types.Error
-  , module Types.Player
   , module Types.GameState
   , module Types.LogEvent
+  , module Types.Player
   , module Types.Rules
+  , module Types.Shared
   )
 where
 

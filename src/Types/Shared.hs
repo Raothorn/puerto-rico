@@ -7,7 +7,7 @@ module Types.Shared
   )
 where
 
-import Control.Monad.Trans.State.Lazy
+import Control.Monad.Trans.State.Lazy (StateT)
 
 import Types.Error (Error)
 
