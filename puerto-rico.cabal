@@ -25,14 +25,16 @@ source-repository head
 
 library
   exposed-modules:
-      Actions
+      ExecAction
       Lib
       StateUpdates
       Types
       Types.GameState
       Types.LogEvent
       Types.Player
+      Types.Rules
       Types.Shared
+      Util
   other-modules:
       Paths_puerto_rico
   autogen-modules:

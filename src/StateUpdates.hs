@@ -1,53 +1,53 @@
-{-# LANGUAGE RankNTypes #-}
-
 module StateUpdates
-  ( placePlantation
-  , logEvent
-  , liftErr
+  ( takeQuarry
+  , takePlantation
+  , placeTile
+  , popPhase
+  , pushPhase
   )
 where
 
 import Control.Monad
-import Control.Monad.Trans.Class
 import Lens.Micro
 import Lens.Micro.Mtl
 
 import Types
+import Util
 
-placePlantation :: (Index Player) -> Plantation -> Update GameState ()
-placePlantation pIx plantation =
-  do
-    remaining <- do
-      r <- (plantationStacks . at plantation) <%= fmap (subtract 1)
-      liftMaybe IndexNotFound r
+takeQuarry :: Update GameState Tile
+takeQuarry = do
+  quarries <- use quarryStack
+  when (quarries <= 0) $
+    liftErr StackEmpty
 
-    when (remaining < 0) $
-      liftErr NoPlantationsLeftInStack
+  quarryStack -= 1
 
-    zoom (playerL pIx . board) $ do
-      plantations' <- plantations <%= (plantation :)
-      when (length plantations' > 12) $
-        liftErr NoEmptyPlantationTiles
+  return QuarryTile
 
-----------
--- Util --
-----------
--- zoomPlayer :: Index Player -> Update GameState Player -> Update Player
--- zoomPlayer pIx = useMaybe NoPlayerFound (playerL pIx)
+takePlantation :: Index Plantation -> Update GameState Tile
+takePlantation plantationIx = do
+  chosenPlantation <-
+    preuse (plantationL plantationIx)
+      >>= (liftMaybe InvalidPlantationIndex) -- invalid traversal
+      >>= (liftMaybe InvalidPlantationIndex) -- no plantation in chosen slot
+  plantationL plantationIx .= Nothing
+  return (PlantationTile chosenPlantation)
 
-liftErr :: Error -> Update s a
-liftErr = lift . Left
+placeTile :: GameRules -> Tile -> Update Player ()
+placeTile rules tile = do
+  let maxTiles = rules ^. numTileSlots
+  numTiles <- use $ tiles . to length
+  when (numTiles >= maxTiles) $ liftErr BoardTilesFull
+  tiles %= (tile :)
 
-liftMaybe :: Error -> Maybe a -> Update s a
-liftMaybe err x =
-  case x of
-    Just v -> return v
-    Nothing -> liftErr err
+popPhase :: Update GameState GamePhase
+popPhase = do
+  curPhaseStack <- use phaseStack
+  case curPhaseStack of
+    [] -> liftErr EmptyPhaseStack
+    p : ps -> do
+      phaseStack .= ps
+      return p
 
-useMaybe :: Error -> Lens' s (Maybe a) -> Update s a
-useMaybe err l = do
-  x <- use l
-  liftMaybe err x
-
-logEvent :: LogEvent -> Update GameState ()
-logEvent event = eventLog %= (event :)
+pushPhase :: GamePhase -> Update GameState ()
+pushPhase phase = phaseStack %= (phase :)
