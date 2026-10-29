@@ -7,6 +7,9 @@ module Types.GameState
   -- Lenses
   , eventLog
   , colonistStack
+  , colonistShip
+  , players
+  , lastRound
   , quarryStack
   , phaseStack
   , playerL
@@ -42,6 +45,7 @@ data GameState = GameState
   , _colonistShip :: Int
   , _colonistStack :: Int
   , _eventLog :: [LogEvent]
+  , _lastRound :: Bool
   }
 
 makeLenses ''GameState
