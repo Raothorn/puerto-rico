@@ -11,6 +11,7 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Lens.Micro
 import Lens.Micro.Mtl
+
 import Types
 
 placePlantation :: (Index Player) -> Plantation -> Update GameState ()
@@ -22,12 +23,11 @@ placePlantation pIx plantation =
 
     when (remaining < 0) $
       liftErr NoPlantationsLeftInStack
-    
+
     zoom (playerL pIx . board) $ do
       plantations' <- plantations <%= (plantation :)
       when (length plantations' > 12) $
         liftErr NoEmptyPlantationTiles
-
 
 ----------
 -- Util --

@@ -2,21 +2,24 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module Types.GameState
-  ( GameState,
-    GamePhase (..),
-    -- Lenses
-    phase,
-    eventLog,
-    plantationStacks,
-    playerL,
-    numPlayersL,
+  ( GameState
+  , GamePhase (..)
+  -- Lenses
+  , phase
+  , eventLog
+  , plantationStacks
+  , colonistStack
+  , playerL
+  , numPlayersL
   )
 where
 
-import qualified Data.Map as M
 import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
+
+import qualified Data.Map as M
+
 import Types.LogEvent
 import Types.Player
 import Types.Shared
@@ -30,6 +33,7 @@ data GameState = GameState
   , _players :: M.Map (Index Player) Player
   , _plantationStacks :: M.Map Plantation Int
   , _colonistShip :: Int
+  , _colonistStack :: Int
   , _eventLog :: [LogEvent]
   }
 

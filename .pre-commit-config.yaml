@@ -1,0 +1,14 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v1.2.3
+    hooks:
+      - id: trailing-whitespace
+
+  - repo: local
+    hooks:
+      - id: fourmolu-check
+        name: Check Haskell formatting
+        entry: .githooks/run-fourmolu.sh
+        language: script
+        pass_filenames: false
+        files: '\.hs$'
