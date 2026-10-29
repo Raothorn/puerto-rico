@@ -16,12 +16,12 @@ module Types.GameState
   )
 where
 
-import Lens.Micro (SimpleGetter, Traversal', ix, to)
+import Lens.Micro
 import Lens.Micro.GHC ()
-import Lens.Micro.TH (makeLenses)
+import Lens.Micro.TH
 
-import qualified Data.Map as Map
-import qualified Data.Set as Set
+import qualified Data.Map as M
+import qualified Data.Set as S
 
 import Types.LogEvent
 import Types.Player
@@ -30,13 +30,13 @@ import Types.Shared
 
 data GamePhase
   = RoleActionPhase Role [Index Player]
-  | ChooseRolePhase (Set.Set Role) [Index Player]
+  | ChooseRolePhase (S.Set Role) [Index Player]
   | NoPhase
 
 data GameState = GameState
   { _phaseStack :: [GamePhase]
-  , _players :: Map.Map (Index Player) Player
-  , _faceUpPlantations :: Map.Map (Index Plantation) (Maybe Plantation)
+  , _players :: M.Map (Index Player) Player
+  , _faceUpPlantations :: M.Map (Index Plantation) (Maybe Plantation)
   , _plantationDiscard :: [Plantation]
   , _quarryStack :: Int
   , _colonistShip :: Int
@@ -52,11 +52,11 @@ rulesL = numPlayersL . to getGameRules
 
 -- | Focus on the player at an index, with no target if the index is absent.
 playerL :: Index Player -> Traversal' GameState Player
-playerL playerIndex = players . ix playerIndex
+playerL playerIx = players . ix playerIx
 
 -- | Focus on a face-up plantation slot, with no target if the index is absent.
 plantationL :: Index Plantation -> Traversal' GameState (Maybe Plantation)
-plantationL plantationIndex = faceUpPlantations . ix plantationIndex
+plantationL plantationIx = faceUpPlantations . ix plantationIx
 
 -- | Read the number of players in the game.
 numPlayersL :: SimpleGetter GameState Int

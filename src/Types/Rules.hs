@@ -7,7 +7,7 @@ module Types.Rules
   )
 where
 
-import Lens.Micro.TH (makeLenses)
+import Lens.Micro.TH
 
 data GameRules = GameRules
   { _numTileSlots :: Int

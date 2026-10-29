@@ -8,9 +8,9 @@ module Util
   )
 where
 
-import Control.Monad.Trans.Class (lift)
-import Lens.Micro (Lens')
-import Lens.Micro.Mtl (use, (%=))
+import Control.Monad.Trans.Class
+import Lens.Micro
+import Lens.Micro.Mtl
 
 import Types
 

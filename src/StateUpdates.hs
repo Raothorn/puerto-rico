@@ -7,9 +7,9 @@ module StateUpdates
   )
 where
 
-import Control.Monad (when)
-import Lens.Micro (to, (^.))
-import Lens.Micro.Mtl (preuse, use, (%=), (-=), (.=))
+import Control.Monad
+import Lens.Micro
+import Lens.Micro.Mtl
 
 import Types
 import Util
@@ -27,12 +27,12 @@ takeQuarry = do
 
 -- | Take a face-up plantation and leave its slot empty.
 takePlantation :: Index Plantation -> Update GameState Tile
-takePlantation plantationIndex = do
+takePlantation plantationIx = do
   plantation <-
-    preuse (plantationL plantationIndex)
+    preuse (plantationL plantationIx)
       >>= liftMaybe InvalidPlantationIndex -- invalid traversal
       >>= liftMaybe InvalidPlantationIndex -- no plantation in chosen slot
-  plantationL plantationIndex .= Nothing
+  plantationL plantationIx .= Nothing
   pure (PlantationTile plantation)
 
 -- | Place a tile on a player's board if there is an available slot.
@@ -46,12 +46,12 @@ placeTile rules tile = do
 -- | Remove and return the current phase, failing when the stack is empty.
 popPhase :: Update GameState GamePhase
 popPhase = do
-  currentPhaseStack <- use phaseStack
-  case currentPhaseStack of
+  curPhaseStack <- use phaseStack
+  case curPhaseStack of
     [] -> liftErr EmptyPhaseStack
-    currentPhase : remainingPhases -> do
+    curPhase : remainingPhases -> do
       phaseStack .= remainingPhases
-      pure currentPhase
+      pure curPhase
 
 -- | Make a phase the current phase by pushing it onto the stack.
 pushPhase :: GamePhase -> Update GameState ()

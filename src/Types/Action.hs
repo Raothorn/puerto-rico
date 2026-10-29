@@ -5,7 +5,7 @@ module Types.Action
   )
 where
 
-import Types.Shared (Index, Plantation, Role)
+import Types.Shared
 
 data Action
   = RoleAction RoleAction

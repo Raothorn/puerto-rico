@@ -8,7 +8,7 @@ module Types.Player
   )
 where
 
-import Lens.Micro.TH (makeLenses)
+import Lens.Micro.TH
 
 import Types.Shared
 
