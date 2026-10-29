@@ -15,3 +15,10 @@ data Error
   | InvalidPlantationIndex
   | EmptyPhaseStack
   | NoError
+  | WrongRole
+  | InvalidTileIndex
+  | InvalidBuildingIndex
+  | DuplicateTilePlacement
+  | ColonistSlotsFull
+  | InvalidColonistCount
+  | InvalidPlayerOrder

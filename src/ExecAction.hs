@@ -1,9 +1,11 @@
 module ExecAction
-  ( execRoleAction
+  ( execAction
+  , execRoleAction
   )
 where
 
 import Control.Monad
+import Lens.Micro
 import Lens.Micro.Mtl
 
 import StateUpdates
@@ -20,13 +22,23 @@ execAction (RoleAction roleAction) = do
     RoleActionPhase curRole playerIxs -> pure (curRole, playerIxs)
     _ -> liftErr WrongPhase
 
+  unless (roleMatchesAction role roleAction) $ liftErr WrongRole
+
   numPlayers <- use numPlayersL
   let hasPrivilege = length remainingPlayerIxs == numPlayers
   (curPlayerIx, remainingPlayerIxs') <- case remainingPlayerIxs of
     [] -> liftErr NoRemainingPlayers
     playerIx : playerIxs -> pure (playerIx, playerIxs)
 
-  execRoleAction curPlayerIx hasPrivilege roleAction
+  _ <- preuse (playerL curPlayerIx) >>= liftMaybe NoPlayerFound
+  case role of
+    Mayor -> do
+      when hasPrivilege $ distributeColonists remainingPlayerIxs
+      case roleAction of
+        OptOut -> zoom (playerL curPlayerIx) keepColonists
+        _ -> execRoleAction curPlayerIx hasPrivilege roleAction
+      when (null remainingPlayerIxs') refillColonistShip
+    _ -> execRoleAction curPlayerIx hasPrivilege roleAction
 
   if null remainingPlayerIxs'
     -- The role phase has been popped, exposing the next phase on the stack.
@@ -44,12 +56,18 @@ execRoleAction playerIx hasPrivilege (SettlerAction settlerAction) = do
   rules <- use rulesL
   zoom (playerL playerIx) $ placeTile rules tile
 
-execRoleAction _ _ MayorAction = do
-  -- TODO: Implement the mayor action.
-  pure ()
+execRoleAction playerIx hasPrivilege (MayorAction (PlaceColonistsAction takePrivilege placements)) = do
+  _ <- preuse (playerL playerIx) >>= liftMaybe NoPlayerFound
+  when (takePrivilege && not hasPrivilege) $ liftErr NoPrivilege
+  numTaken <- if takePrivilege then takeColonist else pure 0
+  zoom (playerL playerIx) $ do
+    colonists += numTaken
+    placeColonists placements
 
 execRoleAction _ _ OptOut = logEvent NoEvent
 
-getRoleFromAction :: RoleAction -> Role
-getRoleFromAction (SettlerAction _) = Settler
-getRoleFromAction _ = Mayor
+roleMatchesAction :: Role -> RoleAction -> Bool
+roleMatchesAction Settler (SettlerAction _) = True
+roleMatchesAction Mayor (MayorAction _) = True
+roleMatchesAction _ OptOut = True
+roleMatchesAction _ _ = False
