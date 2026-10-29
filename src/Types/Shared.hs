@@ -9,7 +9,7 @@ where
 
 import Control.Monad.Trans.State.Lazy
 
-import Types.Error (Error)
+import Types.Error
 
 data Plantation = Tobacco | Sugar | Coffee
   deriving (Eq, Ord)

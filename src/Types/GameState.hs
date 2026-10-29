@@ -18,7 +18,6 @@ where
 
 import Lens.Micro
 import Lens.Micro.GHC ()
-import Lens.Micro.Mtl
 import Lens.Micro.TH
 
 import qualified Data.Map as M
@@ -38,8 +37,7 @@ data GameState = GameState
   { _phaseStack :: [GamePhase]
   , _players :: M.Map (Index Player) Player
   , _faceUpPlantations :: M.Map (Index Plantation) (Maybe Plantation)
-  , -- , -- , _plantationStacks :: M.Map Plantation Int
-    _plantationDiscard :: [Plantation]
+  , _plantationDiscard :: [Plantation]
   , _quarryStack :: Int
   , _colonistShip :: Int
   , _colonistStack :: Int
@@ -48,14 +46,18 @@ data GameState = GameState
 
 makeLenses ''GameState
 
+-- | Derive the game rules from the number of players.
 rulesL :: SimpleGetter GameState GameRules
 rulesL = numPlayersL . to getGameRules
 
-playerL :: (Index Player) -> Traversal' GameState Player
-playerL pIx = players . ix pIx
+-- | Focus on the player at an index, with no target if the index is absent.
+playerL :: Index Player -> Traversal' GameState Player
+playerL playerIx = players . ix playerIx
 
+-- | Focus on a face-up plantation slot, with no target if the index is absent.
 plantationL :: Index Plantation -> Traversal' GameState (Maybe Plantation)
 plantationL plantationIx = faceUpPlantations . ix plantationIx
 
+-- | Read the number of players in the game.
 numPlayersL :: SimpleGetter GameState Int
 numPlayersL = players . to length

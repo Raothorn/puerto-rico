@@ -16,6 +16,7 @@ data GameRules = GameRules
 
 makeLenses ''GameRules
 
+-- | Construct the rules for a game with the given number of players.
 getGameRules :: Int -> GameRules
 getGameRules numPlayers =
   GameRules

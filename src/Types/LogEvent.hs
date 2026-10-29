@@ -1,4 +1,7 @@
-module Types.LogEvent where
+module Types.LogEvent
+  ( LogEvent (..)
+  )
+where
 
 import Types.Player
 import Types.Shared
