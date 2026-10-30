@@ -3,8 +3,10 @@
 
 module Types.Player
   ( Player
+  , newPlayer
   , buildings
   , tiles
+  , doubloons
   , numHolesL
   , buildingL
   , tileL
@@ -23,6 +25,15 @@ data Player = Player
   , _buildings :: [Building]
   , _doubloons :: Int
   }
+
+-- Value initialization happens in state
+newPlayer :: Player
+newPlayer =
+  Player
+    { _tiles = []
+    , _buildings = []
+    , _doubloons = 0
+    }
 
 makeLenses ''Player
 

@@ -8,11 +8,20 @@ module StateUpdates
 where
 
 import Control.Monad
+import Data.Map
 import Lens.Micro
 import Lens.Micro.Mtl
 
 import Types
 import Util
+
+initGame :: Update GameState ()
+initGame = do
+  numPlayers <- use numPlayersL
+  -- Give each player doubloons
+  players . traversed . doubloons .= numPlayers - 1
+
+  return ()
 
 resupplyColonistShip :: Update GameState ()
 resupplyColonistShip = do

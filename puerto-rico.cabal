@@ -28,6 +28,8 @@ library
       ExecAction
       Lib
       StateUpdates
+      Test.ActionTest
+      Test.Helpers
       Types
       Types.Action
       Types.Error

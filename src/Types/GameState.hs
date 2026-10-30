@@ -4,12 +4,14 @@
 module Types.GameState
   ( GameState
   , GamePhase (..)
+  , newGame
   -- Lenses
   , eventLog
   , colonistSupply
   , colonistShip
   , quarryStack
   , phaseStack
+  , players
   , playerL
   , plantationL
   , numPlayersL
@@ -22,7 +24,9 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
+import qualified Data.Foldable as F
 import qualified Data.Map as M
+import qualified Data.Sequence as Seq
 import qualified Data.Set as S
 
 import Types.LogEvent
@@ -31,7 +35,8 @@ import Types.Rules
 import Types.Shared
 
 data GamePhase
-  = RoleActionPhase Role [Index Player]
+  = NewGamePhase
+  | RoleActionPhase Role [Index Player]
   | ChooseRolePhase (S.Set Role) [Index Player]
   | ColonistShipResupplyPhase
   | NoPhase
@@ -47,6 +52,26 @@ data GameState = GameState
   , _colonistSupply :: Int
   , _eventLog :: [LogEvent]
   }
+
+newGame :: Int -> GameState
+newGame numPlayers =
+  GameState
+    { _phaseStack = [NewGamePhase]
+    , _players = playerListToMap (replicate numPlayers newPlayer)
+    , _faceUpPlantations = M.empty
+    , _plantationStack = []
+    , _plantationDiscard = []
+    , _quarryStack = 8
+    , _colonistShip = 0
+    , _colonistSupply = 0
+    , _eventLog = []
+    }
+ where
+  playerListToMap =
+    M.fromList
+      . F.toList
+      . Seq.mapWithIndex (\pIx p -> (Index (pIx + 1), p))
+      . Seq.fromList
 
 makeLenses ''GameState
 
