@@ -7,11 +7,14 @@ data Error
   = NoEmptyPlantationTiles
   | NoRemainingPlayers
   | NoPlayerFound
-  | StackEmpty
+  | NoQuarryTilesRemaining
   | IndexNotFound
   | NoPrivilege
   | WrongPhase
   | BoardTilesFull
+  | NoColonistRemainingInSupply
+  | NoColonistRemainingOnShip
   | InvalidPlantationIndex
+  | TileAlreadyHasColonist
   | EmptyPhaseStack
   | NoError

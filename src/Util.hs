@@ -22,7 +22,7 @@ liftErr = lift . Left
 liftMaybe :: Error -> Maybe a -> Update s a
 liftMaybe err maybeValue =
   case maybeValue of
-    Just value -> pure value
+    Just value -> return value
     Nothing -> liftErr err
 
 -- | Read an optional value through a lens, failing when it is absent.
