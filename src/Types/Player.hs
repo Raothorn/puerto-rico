@@ -15,8 +15,9 @@ where
 
 import Lens.Micro
 import Lens.Micro.GHC ()
-import Lens.Micro.Mtl
 import Lens.Micro.TH
+import Types.Building as B
+import Types.Tile as T
 
 import Types.Shared
 
@@ -40,7 +41,7 @@ makeLenses ''Player
 numHolesL :: SimpleGetter Player Int
 numHolesL = to numHoles
  where
-  numHoles = length . filter (not . (^. hasColonist)) . _tiles
+  numHoles = length . filter (not . (^. B.hasColonist)) . _buildings
 
 buildingL :: Index Building -> Traversal' Player Building
 buildingL (Index buildingIx) = buildings . ix buildingIx
