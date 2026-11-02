@@ -1,12 +1,66 @@
-module Test.Helpers () where
+module Test.Helpers
+  (
+  ) where
 
-import Lens.Micro
-import Lens.Micro.Mtl
+-- import Control.Monad.IO.Class
+-- import Types
+--
+-- type M s = MonadIO (Update s ))
+--
+-- sampleTest :: M GameState ()
+-- sampleTest = do
+--   return ()
 
-import qualified Data.Map as M
-
-import Types
-import Util
-
-numPlayers :: Int
-numPlayers = 3
+-- import Control.Monad
+-- import Control.Monad.Trans.Class
+-- import Control.Monad.Trans.Maybe
+-- import Control.Monad.Trans.State.Lazy
+-- import Data.Functor
+-- import Test.Tasty
+-- import Test.Tasty.HUnit
+-- import Types
+--
+-- type M = IO
+--
+-- type ActionTest = GameState -> M ()
+--
+-- runActionTest :: String -> GameState -> ActionTest -> TestTree
+-- runActionTest name game test = testCase name test'
+--  where
+--   test' = void $  (test game)
+--
+-- expect :: s -> Update s a -> M (s, a)
+-- expect state f = do
+--   let result = runStateT f state
+--   case result of
+--     Left err -> do
+--       assertString $ "Expected a valid result, but got an error: " <> show err
+--       nothing
+--     Right (x, state') -> do
+--       -- when debug $
+--       --   forM_ logs $
+--       --     \log -> lift $ debugEvent log
+--       return (state', x)
+--
+-- eval :: s -> Update s a -> M a
+-- eval state f = expect state f <&> snd
+--
+-- expectErr :: Error -> s -> Update s a -> M ()
+-- expectErr expectedErr state f = do
+--   let result = runStateT f state
+--   case result of
+--     Left err ->
+--       assertEqual "Got an error, but not the right type" expectedErr err
+--     Right _ ->
+--       assertString "Expected an error, but got a valid result"
+--
+-- expectErr' :: s -> Update s a -> M ()
+-- expectErr' state f = do
+--   let result = runStateT f state
+--   case result of
+--     Left _ -> return ()
+--     Right _ ->
+--       assertString "Expected an error, but got a valid result"
+--
+-- nothing :: M a
+-- nothing = mzero

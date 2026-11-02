@@ -27,6 +27,8 @@ dependencies:
 - microlens-th
 - microlens-mtl
 - microlens-ghc
+- tasty
+- tasty-hunit
 
 ghc-options:
 - -Wall

@@ -17,7 +17,12 @@ execAction :: Action -> Update GameState ()
 execAction (ChooseRoleAction _) = do
   -- TODO: Implement role selection.
   return ()
-execAction ResupplyColonistShip = return ()
+execAction ResupplyColonistShip = do
+  curPhase <- popPhase
+  case curPhase of
+    ColonistShipResupplyPhase -> resupplyColonistShip
+    _ -> liftErr WrongPhase
+
 ------------------
 -- Role actions --
 ------------------
@@ -64,13 +69,7 @@ execRoleAction playerIx hasPrivilege (MayorAction source placement) = do
   remainingColonists <- colonistShip <%= (`subtract` 1)
 
   zoom (playerL playerIx) $ do
-    case placement of
-      BuildingPlacement _ -> return ()
-      TilePlacement tileIx -> do
-        zoom (tileL tileIx) $ do
-          alreadyHasColonist <- use hasColonist
-          when alreadyHasColonist $ liftErr TileAlreadyHasColonist
-          hasColonist .= True
+    placeColonist placement
 
   when (remainingColonists <= 0) $
     pushPhase ColonistShipResupplyPhase

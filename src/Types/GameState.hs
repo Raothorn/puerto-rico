@@ -13,7 +13,8 @@ module Types.GameState
   , phaseStack
   , players
   , playerL
-  , plantationL
+  , faceUpPlantations
+  -- , plantationL
   , numPlayersL
   , rulesL
   , totalHolesL
@@ -24,9 +25,9 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
-import qualified Data.Foldable as F
+import qualified Data.Foldable
 import qualified Data.Map as M
-import qualified Data.Sequence as Seq
+import qualified Data.Sequence
 import qualified Data.Set as S
 
 import Types.LogEvent
@@ -44,7 +45,7 @@ data GamePhase
 data GameState = GameState
   { _phaseStack :: [GamePhase]
   , _players :: M.Map (Index Player) Player
-  , _faceUpPlantations :: M.Map (Index Plantation) (Maybe Plantation)
+  , _faceUpPlantations :: [Plantation]
   , _plantationStack :: [Plantation]
   , _plantationDiscard :: [Plantation]
   , _quarryStack :: Int
@@ -53,15 +54,18 @@ data GameState = GameState
   , _eventLog :: [LogEvent]
   }
 
+-----------------
+-- Constructor --
+-----------------
 newGame :: Int -> GameState
 newGame numPlayers =
   GameState
     { _phaseStack = [NewGamePhase]
     , _players = playerListToMap (replicate numPlayers newPlayer)
-    , _faceUpPlantations = M.empty
-    , _plantationStack = []
+    , _faceUpPlantations = []
+    , _plantationStack = allPlantations
     , _plantationDiscard = []
-    , _quarryStack = 8
+    , _quarryStack = 0
     , _colonistShip = 0
     , _colonistSupply = 0
     , _eventLog = []
@@ -69,9 +73,16 @@ newGame numPlayers =
  where
   playerListToMap =
     M.fromList
-      . F.toList
-      . Seq.mapWithIndex (\pIx p -> (Index (pIx + 1), p))
-      . Seq.fromList
+      . Data.Foldable.toList
+      . Data.Sequence.mapWithIndex (\pIx p -> (Index (pIx + 1), p))
+      . Data.Sequence.fromList
+
+  allPlantations =
+    (replicate 8 Coffee)
+      ++ (replicate 9 Tobacco)
+      ++ (replicate 10 Corn)
+      ++ (replicate 11 Sugar)
+      ++ (replicate 12 Indigo)
 
 makeLenses ''GameState
 
@@ -82,10 +93,6 @@ rulesL = numPlayersL . to getGameRules
 -- | Focus on the player at an index
 playerL :: Index Player -> Traversal' GameState Player
 playerL playerIx = players . ix playerIx
-
--- | Focus on a face-up plantation slot
-plantationL :: Index Plantation -> Traversal' GameState (Maybe Plantation)
-plantationL plantationIx = faceUpPlantations . ix plantationIx
 
 -- | Read the number of players in the game.
 numPlayersL :: SimpleGetter GameState Int

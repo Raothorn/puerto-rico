@@ -1,14 +1,16 @@
 module StateUpdates
   ( takeQuarry
+  , initGame
   , takePlantation
+  , resupplyColonistShip
   , placeTile
+  , placeColonist
   , popPhase
   , pushPhase
   )
 where
 
 import Control.Monad
-import Data.Map
 import Lens.Micro
 import Lens.Micro.Mtl
 
@@ -19,7 +21,7 @@ initGame :: Update GameState ()
 initGame = do
   numPlayers <- use numPlayersL
   -- Give each player doubloons
-  players . traversed . doubloons .= numPlayers - 1
+  players . each . doubloons .= numPlayers - 1
 
   return ()
 
@@ -43,17 +45,26 @@ takeQuarry = do
 -- | Take a face-up plantation and leave its slot empty.
 takePlantation :: Index Plantation -> Update GameState TileType
 takePlantation plantationIx = do
-  plantation <-
-    preuse (plantationL plantationIx)
-      >>= liftMaybe InvalidPlantationIndex -- invalid traversal
-      >>= liftMaybe InvalidPlantationIndex -- no plantation in chosen slot
-  plantationL plantationIx .= Nothing
+  (plantation, plantations') <-
+    useMaybe InvalidPlantationIndex (faceUpPlantations . to (removeAt plantationIx))
+
+  faceUpPlantations .= plantations'
   return (PlantationTile plantation)
+
+placeColonist :: ColonistPlacement -> Update Player ()
+placeColonist placement = do
+  case placement of
+    BuildingPlacement _ -> return ()
+    TilePlacement tileIx -> do
+      zoom (tileL tileIx) $ do
+        alreadyHasColonist <- use hasColonist
+        when alreadyHasColonist $ liftErr TileAlreadyHasColonist
+        hasColonist .= True
 
 -- | Place a tile on a player's board if there is an available slot.
 placeTile :: GameRules -> TileType -> Update Player ()
-placeTile rules tileType = do
-  let tile = newTile tileType
+placeTile rules tType = do
+  let tile = newTile tType
   let maxTiles = rules ^. numTileSlots
   numTiles <- use $ tiles . to length
   when (numTiles >= maxTiles) $ liftErr BoardTilesFull

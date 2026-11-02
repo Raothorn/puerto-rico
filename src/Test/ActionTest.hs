@@ -1,1 +1,59 @@
-module Test.ActionTest () where
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+
+module Test.ActionTest (runTests) where
+
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.State
+import Lens.Micro
+import Lens.Micro.Mtl
+import Test.Tasty
+import Test.Tasty.HUnit
+
+import StateUpdates
+import Test.Helpers
+import Types
+
+type TestCase = StateT GameState IO ()
+
+numPlayers :: Int
+numPlayers = 4
+
+sampleGame :: TestCase
+sampleGame = do
+  step initGame
+  -- Check initial state
+  playerCount <- use numPlayersL
+  liftIO $ assertEqual "There should be 4 players" 4 playerCount
+
+  zoom (players . traversed) $ do
+    playerDoubloons <- use doubloons
+    liftIO $ assertEqual "Each player should have 3 doubloons" 3 playerDoubloons
+
+runTests :: TestTree
+runTests =
+  testGroup
+    "action tests"
+    [ testCase "Sample game" $ evalStateT sampleGame game
+    ]
+ where
+  game = newGame numPlayers
+
+step :: Update s a -> StateT s IO a
+step action = StateT $ \state ->
+  case runStateT action state of
+    Left err -> assertFailure (show err)
+    Right result -> return result
+
+expectErr :: Error -> Update s a -> StateT s IO ()
+expectErr expectedErr action = StateT $ \state ->
+  case runStateT action state of
+    Left err -> do
+      assertEqual "Expected error" expectedErr err
+      pure ((), state)
+    Right _ -> assertFailure failureString
+ where
+  failureString =
+    "Expected error: "
+      <> show expectedErr
+      <> " but got valid result."

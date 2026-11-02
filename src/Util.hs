@@ -5,6 +5,7 @@ module Util
   , liftMaybe
   , useMaybe
   , logEvent
+  , removeAt
   )
 where
 
@@ -26,7 +27,7 @@ liftMaybe err maybeValue =
     Nothing -> liftErr err
 
 -- | Read an optional value through a lens, failing when it is absent.
-useMaybe :: Error -> Lens' s (Maybe a) -> Update s a
+useMaybe :: Error -> SimpleGetter s (Maybe a) -> Update s a
 useMaybe err valueLens = do
   maybeValue <- use valueLens
   liftMaybe err maybeValue
@@ -34,3 +35,14 @@ useMaybe err valueLens = do
 -- | Prepend an event to the game log.
 logEvent :: LogEvent -> Update GameState ()
 logEvent event = eventLog %= (event :)
+
+---------------
+-- List Util --
+---------------
+removeAt :: (Index a) -> [a] -> Maybe (a, [a])
+removeAt (Index i) xs
+  | i < 0 = Nothing
+  | otherwise =
+      case splitAt i xs of
+        (before, x : after) -> Just (x, before ++ after)
+        (_, []) -> Nothing

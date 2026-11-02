@@ -32,12 +32,14 @@ library
       Test.Helpers
       Types
       Types.Action
+      Types.Building
       Types.Error
       Types.GameState
       Types.LogEvent
       Types.Player
       Types.Rules
       Types.Shared
+      Types.Tile
       Util
   other-modules:
       Paths_puerto_rico
@@ -53,6 +55,8 @@ library
     , microlens-ghc
     , microlens-mtl
     , microlens-th
+    , tasty
+    , tasty-hunit
     , transformers
   default-language: Haskell2010
 
@@ -73,6 +77,8 @@ executable puerto-rico-exe
     , microlens-mtl
     , microlens-th
     , puerto-rico
+    , tasty
+    , tasty-hunit
     , transformers
   default-language: Haskell2010
 
@@ -94,5 +100,7 @@ test-suite puerto-rico-test
     , microlens-mtl
     , microlens-th
     , puerto-rico
+    , tasty
+    , tasty-hunit
     , transformers
   default-language: Haskell2010

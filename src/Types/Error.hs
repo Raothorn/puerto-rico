@@ -18,3 +18,4 @@ data Error
   | TileAlreadyHasColonist
   | EmptyPhaseStack
   | NoError
+  deriving (Eq, Show)
