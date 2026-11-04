@@ -1,6 +1,5 @@
 module StateUpdates
   ( takeQuarry
-  , initGame
   , takePlantation
   , resupplyColonistShip
   , placeTile
@@ -17,17 +16,6 @@ import Lens.Micro.Mtl
 import Rules
 import Types
 import Util
-
-initGame :: Update GameState ()
-initGame = do
-  numPlayers <- use numPlayersL
-  -- Give each player doubloons
-  players . each . doubloons .= numPlayers - 1
-
-  -- Place the initial plantations
-  forM_ (zip (initPlayerPlantations numPlayers) [1 ..]) $ \(plantation, playerIx) ->
-    zoom (playerL (Index playerIx)) $
-      placeTile (PlantationTile plantation)
 
 resupplyColonistShip :: Update GameState ()
 resupplyColonistShip = do
