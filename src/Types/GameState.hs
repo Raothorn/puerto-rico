@@ -16,7 +16,6 @@ module Types.GameState
   , faceUpPlantations
   -- , plantationL
   , numPlayersL
-  , rulesL
   , totalHolesL
   )
 where
@@ -30,11 +29,11 @@ import qualified Data.Map as M
 import qualified Data.Sequence
 import qualified Data.Set as S
 
+import Rules
 import Types.Index
 import Types.LogEvent
 import Types.Player
 import Types.Role
-import Types.Rules as Rules
 import Types.Tile
 
 data GamePhase
@@ -66,7 +65,7 @@ newGame numPlayers =
     { _phaseStack = [ChooseRolePhase roles (M.keys players)]
     , _players = players
     , _faceUpPlantations = []
-    , _plantationStack = rules ^. initPlantationStack
+    , _plantationStack = initPlantationStack numPlayers
     , _plantationDiscard = []
     , _quarryStack = 8
     , _colonistShip = 0
@@ -81,14 +80,9 @@ newGame numPlayers =
       . Data.Sequence.fromList
   players = playerListToMap (replicate numPlayers newPlayer)
 
-  rules = getGameRules numPlayers
   roles = S.fromList [Builder, Mayor, Settler]
 
 makeLenses ''GameState
-
--- | Derive the game rules from the number of players.
-rulesL :: SimpleGetter GameState GameRules
-rulesL = numPlayersL . to getGameRules
 
 -- | Focus on the player at an index
 playerL :: Index Player -> Traversal' GameState Player
