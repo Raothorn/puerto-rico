@@ -3,22 +3,27 @@
 module Types.Tile
   ( Tile
   , TileType (..)
+  , Plantation (..)
   , tileType
-  , hasColonist
+  , tileHasColonist
   , newTile
   ) where
 
 import Lens.Micro.TH
-import Types.Shared
+
+data Plantation = Coffee | Sugar | Indigo | Tobacco | Corn
+  deriving (Eq, Show)
 
 data Tile = Tile
   { _tileType :: TileType
-  , _hasColonist :: Bool
+  , _tileHasColonist :: Bool
   }
+  deriving (Eq, Show)
 
 data TileType
   = PlantationTile Plantation
   | QuarryTile
+  deriving (Eq, Show)
 
 makeLenses ''Tile
 

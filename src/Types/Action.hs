@@ -7,9 +7,9 @@ module Types.Action
   )
 where
 
-import Types.Shared
-
 import Types.Building
+import Types.Index
+import Types.Role
 import Types.Tile
 
 data Action

@@ -33,6 +33,7 @@ library
       Types
       Types.Action
       Types.Building
+      Types.Error
       Types.GameState
       Types.Index
       Types.LogEvent
