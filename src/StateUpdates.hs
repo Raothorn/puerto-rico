@@ -14,6 +14,7 @@ import Control.Monad
 import Lens.Micro
 import Lens.Micro.Mtl
 
+import Rules
 import Types
 import Util
 
@@ -24,8 +25,7 @@ initGame = do
   players . each . doubloons .= numPlayers - 1
 
   -- Place the initial plantations
-  gameRules <- use rulesL
-  forM_ (zip (gameRules ^. initPlayerPlantations) [1 ..]) $ \(plantation, playerIx) ->
+  forM_ (zip (initPlayerPlantations numPlayers) [1 ..]) $ \(plantation, playerIx) ->
     zoom (playerL (Index playerIx)) $
       placeTile (PlantationTile plantation)
 

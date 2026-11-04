@@ -3,7 +3,6 @@ module Types
   , module Types.GameState
   , module Types.LogEvent
   , module Types.Player
-  , module Types.Rules
   , module Types.Building
   , module Types.Tile
   , module Types.Index
@@ -22,7 +21,6 @@ import Types.Index
 import Types.LogEvent
 import Types.Player
 import Types.Role
-import Types.Rules
 import Types.Tile
 
 data Error

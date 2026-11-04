@@ -64,7 +64,6 @@ execRoleAction playerIx hasPrivilege (SettlerAction settlerAction) = do
       unless hasPrivilege $ liftErr NoPrivilege
       takeQuarry
     TakePlantationAction plantationIx -> takePlantation plantationIx
-  rules <- use rulesL
   zoom (playerL playerIx) $ placeTile tile
 
 ------------------

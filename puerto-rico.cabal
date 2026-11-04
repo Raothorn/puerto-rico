@@ -27,6 +27,7 @@ library
   exposed-modules:
       ExecAction
       Lib
+      Rules
       StateUpdates
       Test.ActionTest
       Test.Helpers
@@ -39,7 +40,6 @@ library
       Types.LogEvent
       Types.Player
       Types.Role
-      Types.Rules
       Types.Tile
       Util
   other-modules:
