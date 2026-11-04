@@ -9,6 +9,9 @@ where
 
 import Types.Shared
 
+import Types.Building
+import Types.Tile
+
 data Action
   = RoleAction RoleAction
   | ChooseRoleAction Role
@@ -17,6 +20,7 @@ data Action
 data RoleAction
   = SettlerAction SettlerAction
   | MayorAction ColonistSource ColonistPlacement
+  | BuilderAction BuildingType
   | OptOut
 
 data SettlerAction

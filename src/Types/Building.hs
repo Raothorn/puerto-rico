@@ -4,7 +4,7 @@ module Types.Building
   ( Building
   , BuildingType (..)
   , buildingType
-  , hasColonist
+  , buildingHasColonist
   , newBuilding
   ) where
 
@@ -12,12 +12,14 @@ import Lens.Micro.TH
 
 data Building = Building
   { _buildingType :: BuildingType
-  , _hasColonist :: Bool
+  , _buildingHasColonist :: Bool
   }
+  deriving (Eq, Show)
 
 data BuildingType
   = SmallIndigoPlant
   | SmallMarket
+  deriving (Eq, Show)
 
 makeLenses ''Building
 

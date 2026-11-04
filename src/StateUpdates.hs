@@ -23,7 +23,11 @@ initGame = do
   -- Give each player doubloons
   players . each . doubloons .= numPlayers - 1
 
-  return ()
+  -- Place the initial plantations
+  gameRules <- use rulesL
+  forM_ (zip (gameRules ^. initPlayerPlantations) [1 ..]) $ \(plantation, playerIx) ->
+    zoom (playerL (Index playerIx)) $
+      placeTile (PlantationTile plantation)
 
 resupplyColonistShip :: Update GameState ()
 resupplyColonistShip = do
@@ -57,18 +61,23 @@ placeColonist placement = do
     BuildingPlacement _ -> return ()
     TilePlacement tileIx -> do
       zoom (tileL tileIx) $ do
-        alreadyHasColonist <- use hasColonist
+        alreadyHasColonist <- use tileHasColonist
         when alreadyHasColonist $ liftErr TileAlreadyHasColonist
-        hasColonist .= True
+        tileHasColonist .= True
 
 -- | Place a tile on a player's board if there is an available slot.
-placeTile :: GameRules -> TileType -> Update Player ()
-placeTile rules tType = do
+placeTile :: TileType -> Update Player ()
+placeTile tType = do
   let tile = newTile tType
-  let maxTiles = rules ^. numTileSlots
   numTiles <- use $ tiles . to length
-  when (numTiles >= maxTiles) $ liftErr BoardTilesFull
+  when (numTiles >= boardTileSlots) $ liftErr BoardTilesFull
   tiles %= (tile :)
+
+placeBuilding :: BuildingType -> Update Player ()
+placeBuilding bType = do
+  numBuildings <- use $ buildings . to length
+  when (numBuildings >= 12) $ liftErr BuildingSlotsFull
+  buildings %= (newBuilding bType :)
 
 -- | Remove and return the current phase, failing when the stack is empty.
 popPhase :: Update GameState GamePhase

@@ -30,6 +30,13 @@ sampleGame = do
     playerDoubloons <- use doubloons
     liftIO $ assertEqual "Each player should have 3 doubloons" 3 playerDoubloons
 
+  playerPlantations <- gets $ toListOf (players . traversed . tiles . traversed . tileType)
+  liftIO $
+    assertEqual
+      "The starting plantations should be: Indigo, Indigo, Corn Corn"
+      (map PlantationTile [Indigo, Indigo, Corn, Corn])
+      playerPlantations
+
 runTests :: TestTree
 runTests =
   testGroup

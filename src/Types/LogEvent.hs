@@ -3,8 +3,9 @@ module Types.LogEvent
   )
 where
 
+import Types.Index
 import Types.Player
-import Types.Shared
+import Types.Tile
 
 data LogEvent
   = PlantationPlaced (Index Player) Plantation

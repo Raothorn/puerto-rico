@@ -5,9 +5,11 @@ module Types.Tile
   , TileType (..)
   , tileType
   , hasColonist
+  , newTile
   ) where
 
 import Lens.Micro.TH
+import Types.Shared
 
 data Tile = Tile
   { _tileType :: TileType
@@ -15,8 +17,8 @@ data Tile = Tile
   }
 
 data TileType
-  = SmallIndigoPlant
-  | SmallMarket
+  = PlantationTile Plantation
+  | QuarryTile
 
 makeLenses ''Tile
 

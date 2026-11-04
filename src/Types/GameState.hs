@@ -30,10 +30,12 @@ import qualified Data.Map as M
 import qualified Data.Sequence
 import qualified Data.Set as S
 
+import Types.Index
 import Types.LogEvent
 import Types.Player
-import Types.Rules
-import Types.Shared
+import Types.Role
+import Types.Rules as Rules
+import Types.Tile
 
 data GamePhase
   = NewGamePhase
@@ -41,6 +43,7 @@ data GamePhase
   | ChooseRolePhase (S.Set Role) [Index Player]
   | ColonistShipResupplyPhase
   | NoPhase
+  deriving (Eq, Show)
 
 data GameState = GameState
   { _phaseStack :: [GamePhase]
@@ -60,12 +63,12 @@ data GameState = GameState
 newGame :: Int -> GameState
 newGame numPlayers =
   GameState
-    { _phaseStack = [NewGamePhase]
-    , _players = playerListToMap (replicate numPlayers newPlayer)
+    { _phaseStack = [ChooseRolePhase roles (M.keys players)]
+    , _players = players
     , _faceUpPlantations = []
-    , _plantationStack = allPlantations
+    , _plantationStack = rules ^. initPlantationStack
     , _plantationDiscard = []
-    , _quarryStack = 0
+    , _quarryStack = 8
     , _colonistShip = 0
     , _colonistSupply = 0
     , _eventLog = []
@@ -76,13 +79,10 @@ newGame numPlayers =
       . Data.Foldable.toList
       . Data.Sequence.mapWithIndex (\pIx p -> (Index (pIx + 1), p))
       . Data.Sequence.fromList
+  players = playerListToMap (replicate numPlayers newPlayer)
 
-  allPlantations =
-    (replicate 8 Coffee)
-      ++ (replicate 9 Tobacco)
-      ++ (replicate 10 Corn)
-      ++ (replicate 11 Sugar)
-      ++ (replicate 12 Indigo)
+  rules = getGameRules numPlayers
+  roles = S.fromList [Builder, Mayor, Settler]
 
 makeLenses ''GameState
 

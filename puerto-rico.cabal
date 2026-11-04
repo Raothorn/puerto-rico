@@ -33,12 +33,12 @@ library
       Types
       Types.Action
       Types.Building
-      Types.Error
       Types.GameState
+      Types.Index
       Types.LogEvent
       Types.Player
+      Types.Role
       Types.Rules
-      Types.Shared
       Types.Tile
       Util
   other-modules:

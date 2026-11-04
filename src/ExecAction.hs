@@ -10,14 +10,19 @@ import StateUpdates
 import Types
 import Util
 
-execAction :: Action -> Update GameState ()
+execAction :: Index Player -> Action -> Update GameState ()
 --------------------
 -- Role Selection --
 --------------------
-execAction (ChooseRoleAction _) = do
+execAction playerIx (ChooseRoleAction role) = do
   -- TODO: Implement role selection.
+  curPhase <- popPhase
+  (remainingRoles, remainingPlayers) <- case curPhase of
+    ChooseRolePhase roles players -> return (roles, players)
+    _ -> liftErr WrongPhase
+
   return ()
-execAction ResupplyColonistShip = do
+execAction playerIx ResupplyColonistShip = do
   curPhase <- popPhase
   case curPhase of
     ColonistShipResupplyPhase -> resupplyColonistShip
@@ -26,7 +31,7 @@ execAction ResupplyColonistShip = do
 ------------------
 -- Role actions --
 ------------------
-execAction (RoleAction roleAction) = do
+execAction playerIx (RoleAction roleAction) = do
   curPhase <- popPhase
   (role, remainingPlayerIxs) <- case curPhase of
     RoleActionPhase curRole playerIxs -> return (curRole, playerIxs)
@@ -38,13 +43,14 @@ execAction (RoleAction roleAction) = do
     [] -> liftErr NoRemainingPlayers
     playerIx : playerIxs -> return (playerIx, playerIxs)
 
+  unless (playerIx == curPlayerIx) $ liftErr (WrongPlayer curPlayerIx playerIx)
   execRoleAction curPlayerIx hasPrivilege roleAction
 
   if null remainingPlayerIxs'
     -- The role phase has been popped, exposing the next phase on the stack.
     then return ()
     else pushPhase $ RoleActionPhase role remainingPlayerIxs'
-execAction _ = return ()
+execAction _ _ = return ()
 
 --------------------
 -- Settler Action --
@@ -59,7 +65,7 @@ execRoleAction playerIx hasPrivilege (SettlerAction settlerAction) = do
       takeQuarry
     TakePlantationAction plantationIx -> takePlantation plantationIx
   rules <- use rulesL
-  zoom (playerL playerIx) $ placeTile rules tile
+  zoom (playerL playerIx) $ placeTile tile
 
 ------------------
 -- Mayor Action --
@@ -73,7 +79,12 @@ execRoleAction playerIx hasPrivilege (MayorAction source placement) = do
 
   when (remainingColonists <= 0) $
     pushPhase ColonistShipResupplyPhase
-execRoleAction _ _ OptOut = logEvent NoEvent
+execRoleAction _ _ _ = logEvent NoEvent
+
+--------------------
+-- Builder Action --
+--------------------
+-- execRoleAction playerIx hasPrivilege (Building)
 
 getRoleFromAction :: RoleAction -> Role
 getRoleFromAction (SettlerAction _) = Settler

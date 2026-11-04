@@ -17,5 +17,6 @@ data Error
   | InvalidPlantationIndex
   | TileAlreadyHasColonist
   | EmptyPhaseStack
+  | BuildingSlotsFull
   | NoError
   deriving (Eq, Show)
