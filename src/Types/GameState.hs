@@ -24,9 +24,7 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
-import qualified Data.Foldable
 import qualified Data.Map as M
-import qualified Data.Sequence
 import qualified Data.Set as S
 
 import Rules
@@ -59,6 +57,7 @@ data GameState = GameState
 -----------------
 -- Constructor --
 -----------------
+-- | Construct a game with each player's starting doubloons and plantation.
 newGame :: Int -> GameState
 newGame numPlayers =
   GameState
@@ -73,12 +72,16 @@ newGame numPlayers =
     , _eventLog = []
     }
  where
-  playerListToMap =
-    M.fromList
-      . Data.Foldable.toList
-      . Data.Sequence.mapWithIndex (\pIx p -> (Index (pIx + 1), p))
-      . Data.Sequence.fromList
-  players = playerListToMap (replicate numPlayers newPlayer)
+  players =
+    M.fromList $
+      zip (map Index [1 .. numPlayers]) $
+        map startingPlayer (startingTiles ++ repeat [])
+  startingTiles =
+    map (\plantation -> [newTile (PlantationTile plantation)]) (initPlayerPlantations numPlayers)
+  startingPlayer initialTiles =
+    newPlayer
+      & doubloons .~ (numPlayers - 1)
+      & tiles .~ initialTiles
 
   roles = S.fromList [Builder, Mayor, Settler]
 
