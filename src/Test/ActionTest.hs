@@ -10,7 +10,6 @@ import Lens.Micro.Mtl
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import StateUpdates
 import Test.Helpers
 import Types
 
@@ -21,7 +20,6 @@ numPlayers = 4
 
 sampleGame :: TestCase
 sampleGame = do
-  step initGame
   -- Check initial state
   playerCount <- use numPlayersL
   liftIO $ assertEqual "There should be 4 players" 4 playerCount
