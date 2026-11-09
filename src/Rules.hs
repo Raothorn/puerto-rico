@@ -1,7 +1,7 @@
 module Rules
   ( boardTileSlots
   , numFaceUpPlantations
-  , initPlayerPlantations
+  , startingPlantation
   , initPlantationStack
   )
 where
@@ -17,13 +17,8 @@ boardTileSlots = 12
 numFaceUpPlantations :: Int -> Int
 numFaceUpPlantations numPlayers = numPlayers + 1
 
--- | Starting plantations in player order for the given number of players.
-initPlayerPlantations :: Int -> [Plantation]
-initPlayerPlantations numPlayers = case numPlayers of
-  3 -> [Indigo, Indigo, Corn]
-  4 -> [Indigo, Indigo, Corn, Corn]
-  5 -> [Indigo, Indigo, Indigo, Corn, Corn]
-  _ -> []
+startingPlantation :: Int -> Int -> Plantation
+startingPlantation numPlayers playerIx = (initPlayerPlantations numPlayers) !! playerIx
 
 -- | Plantation supply after removing the players' starting plantations.
 initPlantationStack :: Int -> [Plantation]
@@ -35,3 +30,9 @@ initPlantationStack numPlayers = startingPlantationStack \\ initPlayerPlantation
       ++ (replicate 10 Corn)
       ++ (replicate 11 Sugar)
       ++ (replicate 12 Indigo)
+
+initPlayerPlantations :: Int -> [Plantation]
+initPlayerPlantations 3 = [Indigo, Indigo, Corn]
+initPlayerPlantations 4 = [Indigo, Indigo, Corn, Corn]
+initPlayerPlantations 5 = [Indigo, Indigo, Indigo, Corn, Corn]
+initPlayerPlantations _ = []

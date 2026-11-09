@@ -11,6 +11,7 @@ module Types.GameState
   , colonistShip
   , quarryStack
   , phaseStack
+  , plantationStack
   , players
   , playerL
   , faceUpPlantations
@@ -46,8 +47,8 @@ data GameState = GameState
   , _players :: [Player]
   , _faceUpPlantations :: [Plantation]
   , _plantationStack :: [Plantation]
-  , _plantationDiscard :: [Plantation]
-  , _quarryStack :: Int
+  , -- , _plantationDiscard :: [Plantation]
+    _quarryStack :: Int
   , _colonistShip :: Int
   , _colonistSupply :: Int
   , _eventLog :: [LogEvent]
@@ -62,25 +63,20 @@ newGame :: Int -> GameState
 newGame numPlayers =
   GameState
     { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
-    , _players = players
+    , _players = map player [0 .. numPlayers - 1]
     , _faceUpPlantations = []
     , _plantationStack = initPlantationStack numPlayers
-    , _plantationDiscard = []
-    , _quarryStack = 8
+    , -- , _plantationDiscard = []
+      _quarryStack = 8
     , _colonistShip = 0
     , _colonistSupply = 0
     , _eventLog = []
     }
  where
-  players =
-    take numPlayers $
-      map startingPlayer (startingTiles ++ repeat [])
-  startingTiles =
-    map (\plantation -> [newTile (PlantationTile plantation)]) (initPlayerPlantations numPlayers)
-  startingPlayer initialTiles =
+  player pIx =
     newPlayer
       & doubloons .~ (numPlayers - 1)
-      & tiles .~ initialTiles
+      & tiles .~ [newTile (PlantationTile (startingPlantation numPlayers pIx))]
   roles = S.fromList [Builder, Mayor, Settler]
 
 makeLenses ''GameState
