@@ -24,7 +24,6 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
-import qualified Data.Map as M
 import qualified Data.Set as S
 
 import Rules
@@ -44,7 +43,7 @@ data GamePhase
 
 data GameState = GameState
   { _phaseStack :: [GamePhase]
-  , _players :: M.Map (Index Player) Player
+  , _players :: [Player]
   , _faceUpPlantations :: [Plantation]
   , _plantationStack :: [Plantation]
   , _plantationDiscard :: [Plantation]
@@ -61,7 +60,7 @@ data GameState = GameState
 newGame :: Int -> GameState
 newGame numPlayers =
   GameState
-    { _phaseStack = [ChooseRolePhase roles (M.keys players)]
+    { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
     , _players = players
     , _faceUpPlantations = []
     , _plantationStack = initPlantationStack numPlayers
@@ -73,9 +72,8 @@ newGame numPlayers =
     }
  where
   players =
-    M.fromList $
-      zip (map Index [1 .. numPlayers]) $
-        map startingPlayer (startingTiles ++ repeat [])
+    take numPlayers $
+      map startingPlayer (startingTiles ++ repeat [])
   startingTiles =
     map (\plantation -> [newTile (PlantationTile plantation)]) (initPlayerPlantations numPlayers)
   startingPlayer initialTiles =
@@ -87,9 +85,9 @@ newGame numPlayers =
 
 makeLenses ''GameState
 
--- | Focus on the player at an index
+-- | Focus on the player at a zero-based index.
 playerL :: Index Player -> Traversal' GameState Player
-playerL playerIx = players . ix playerIx
+playerL (Index playerIx) = players . ix playerIx
 
 -- | Read the number of players in the game.
 numPlayersL :: SimpleGetter GameState Int
