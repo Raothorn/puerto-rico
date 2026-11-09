@@ -57,6 +57,7 @@ data GameState = GameState
 -----------------
 -- Constructor --
 -----------------
+
 -- | Construct a game with each player's starting doubloons and plantation.
 newGame :: Int -> GameState
 newGame numPlayers =
@@ -82,7 +83,6 @@ newGame numPlayers =
     newPlayer
       & doubloons .~ (numPlayers - 1)
       & tiles .~ initialTiles
-
   roles = S.fromList [Builder, Mayor, Settler]
 
 makeLenses ''GameState
