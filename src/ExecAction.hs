@@ -41,7 +41,7 @@ execAction playerIx (RoleAction roleAction) = do
   let hasPrivilege = length remainingPlayerIxs == numPlayers
   (curPlayerIx, remainingPlayerIxs') <- case remainingPlayerIxs of
     [] -> liftErr NoRemainingPlayers
-    playerIx : playerIxs -> return (playerIx, playerIxs)
+    pIx : pIxs -> return (pIx, pIxs)
 
   unless (playerIx == curPlayerIx) $ liftErr WrongPlayer
   execRoleAction curPlayerIx hasPrivilege roleAction
@@ -64,7 +64,7 @@ execRoleAction playerIx hasPrivilege (SettlerAction settlerAction) = do
       unless hasPrivilege $ liftErr NoPrivilege
       takeQuarry
     TakePlantationAction plantationIx -> takePlantation plantationIx
-  zoom (playerL playerIx) $ placeTile tile
+  zoomPlayer playerIx $ placeTile tile
 
 --------------------
 -- Builder Action --
@@ -91,6 +91,9 @@ execRoleAction _ _ _ = logEvent NoEvent
 --------------------
 -- execRoleAction playerIx hasPrivilege (Building)
 
-getRoleFromAction :: RoleAction -> Role
-getRoleFromAction (SettlerAction _) = Settler
-getRoleFromAction _ = Mayor
+-------------
+-- Helpers --
+-------------
+
+zoomPlayer :: Index Player -> Update Player () -> Update GameState ()
+zoomPlayer playerIx = zoomRequired NoPlayerFound (playerL playerIx)

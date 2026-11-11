@@ -13,14 +13,16 @@ module Types.Player
   )
 where
 
+import Data.Maybe
 import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
-import Rules
 import Types.Building
 import Types.Index
 import Types.Tile
+
+import qualified Rules
 
 data Player = Player
   { _tiles :: [Tile]
@@ -29,21 +31,18 @@ data Player = Player
   }
   deriving (Eq, Show)
 
--- Value initialization happens in state
-newPlayer :: Player
-newPlayer =
-  Player
-    { _tiles = []
-    , _buildings = []
-    , _doubloons = 0
-    }
+newPlayer :: Int -> Int -> Maybe Player
+newPlayer numPlayers playerIx = do
+  startingPlantation <- Rules.startingPlantation numPlayers playerIx
+  return $ Player [newTile $ PlantationTile startingPlantation] [] (numPlayers - 1)
 
 makeLenses ''Player
 
 numHolesL :: SimpleGetter Player Int
 numHolesL = to (sum . map numHoles . _buildings)
  where
-  numHoles building = buildingHoles (building ^. buildingType) - (building ^. buildingColonists)
+  numHoles building = (buildingHoles building) - (building ^. buildingColonists)
+  buildingHoles building = fromMaybe 0 $ Rules.buildingHoles (building ^. buildingType)
 
 buildingL :: Index Building -> Traversal' Player Building
 buildingL (Index buildingIx) = buildings . ix buildingIx

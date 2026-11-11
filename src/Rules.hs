@@ -10,9 +10,8 @@ module Rules
   )
 where
 
-import Data.List (lookup, (\\))
-
-import qualified Data.Map as M
+import Data.List (lookup, (!?), (\\))
+import Data.Maybe
 
 import Types.Building
 import Types.Tile
@@ -24,12 +23,17 @@ boardTileSlots = 12
 numFaceUpPlantations :: Int -> Int
 numFaceUpPlantations numPlayers = numPlayers + 1
 
-startingPlantation :: Int -> Int -> Plantation
-startingPlantation numPlayers playerIx = (initPlayerPlantations numPlayers) !! playerIx
+startingPlantation :: Int -> Int -> Maybe Plantation
+startingPlantation numPlayers playerIx = do
+  -- (initPlayerPlantations numPlayers) !? playerIx
+  initPs <- initPlayerPlantations numPlayers
+  initPs !? playerIx
 
 -- | Plantation supply after removing the players' starting plantations.
-initPlantationStack :: Int -> [Plantation]
-initPlantationStack numPlayers = startingPlantationStack \\ initPlayerPlantations numPlayers
+initPlantationStack :: Int -> Maybe [Plantation]
+initPlantationStack numPlayers = do
+  initPs <- initPlayerPlantations numPlayers
+  return $ startingPlantationStack \\ initPs
  where
   startingPlantationStack =
     (replicate 8 Coffee)
@@ -38,16 +42,15 @@ initPlantationStack numPlayers = startingPlantationStack \\ initPlayerPlantation
       ++ (replicate 11 Sugar)
       ++ (replicate 12 Indigo)
 
-initPlayerPlantations :: Int -> [Plantation]
-initPlayerPlantations 3 = [Indigo, Indigo, Corn]
-initPlayerPlantations 4 = [Indigo, Indigo, Corn, Corn]
-initPlayerPlantations 5 = [Indigo, Indigo, Indigo, Corn, Corn]
-initPlayerPlantations _ = []
+initPlayerPlantations :: Int -> Maybe [Plantation]
+initPlayerPlantations 3 = Just [Indigo, Indigo, Corn]
+initPlayerPlantations 4 = Just [Indigo, Indigo, Corn, Corn]
+initPlayerPlantations 5 = Just [Indigo, Indigo, Indigo, Corn, Corn]
+initPlayerPlantations _ = Just []
 
-initialAvailableBuildings :: M.Map BuildingType Int
+initialAvailableBuildings :: [(BuildingType, Int)]
 initialAvailableBuildings =
-  M.fromList $
-    map (\(t, _, _) -> (t, if isBuildingLarge t then 1 else 2)) buildingInfo
+  map (\(t, _, _) -> (t, if isBuildingLarge t then 1 else 2)) buildingInfo
 
 isBuildingLarge :: BuildingType -> Bool
 isBuildingLarge GuildHall = True
@@ -57,21 +60,11 @@ isBuildingLarge CustomsHouse = True
 isBuildingLarge CityHall = True
 isBuildingLarge _ = False
 
-buildingHoles :: BuildingType -> Int
-buildingHoles bType =
-  case holes of
-    Just h -> h
-    Nothing -> 0
- where
-  holes = lookup bType (map (\(t, _, h) -> (t, h)) buildingInfo)
+buildingHoles :: BuildingType -> Maybe Int
+buildingHoles bType = lookup bType (map (\(t, _, h) -> (t, h)) buildingInfo)
 
-buildingCost :: BuildingType -> Int
-buildingCost bType =
-  case cost of
-    Just c -> c
-    Nothing -> 0
- where
-  cost = lookup bType (map (\(t, c, _) -> (t, c)) buildingInfo)
+buildingCost :: BuildingType -> Maybe Int
+buildingCost bType = lookup bType (map (\(t, c, _) -> (t, c)) buildingInfo)
 
 -- | (Type, Cost, Holes)
 buildingInfo :: [(BuildingType, Int, Int)]

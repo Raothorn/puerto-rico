@@ -3,6 +3,7 @@
 module Util
   ( liftErr
   , liftMaybe
+  , zoomRequired
   , useMaybe
   , logEvent
   , removeAt
@@ -25,6 +26,11 @@ liftMaybe err maybeValue =
   case maybeValue of
     Just value -> return value
     Nothing -> liftErr err
+
+zoomRequired :: Error -> Traversal' s a -> Update a () -> Update s ()
+zoomRequired err target action = do
+  _ <- preuse target >>= liftMaybe err
+  zoom target action
 
 -- | Read an optional value through a lens, failing when it is absent.
 useMaybe :: Error -> SimpleGetter s (Maybe a) -> Update s a

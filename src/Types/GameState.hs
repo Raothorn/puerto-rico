@@ -9,10 +9,11 @@ module Types.GameState
   , eventLog
   , colonistSupply
   , colonistShip
+  , currentMayor
   , quarryStack
   , phaseStack
   , plantationStack
-  , players
+  , gamePlayers
   , playerL
   , faceUpPlantations
   -- , plantationL
@@ -21,6 +22,7 @@ module Types.GameState
   )
 where
 
+import Data.Maybe
 import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
@@ -47,9 +49,10 @@ data GamePhase
 
 data GameState = GameState
   { _phaseStack :: [GamePhase]
-  , _players :: [Player]
+  , _gamePlayers :: [Player]
   , _faceUpPlantations :: [Plantation]
   , _plantationStack :: [Plantation]
+  , _currentMayor :: Index Player
   , -- , _plantationDiscard :: [Plantation]
     _quarryStack :: Int
   , _availableBuildings :: M.Map BuildingType Int
@@ -63,35 +66,33 @@ data GameState = GameState
 -----------------
 
 -- | Construct a game with each player's starting doubloons and plantation.
-newGame :: Int -> GameState
-newGame numPlayers =
-  GameState
-    { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
-    , _players = map player [0 .. numPlayers - 1]
-    , _faceUpPlantations = []
-    , _plantationStack = Rules.initPlantationStack numPlayers
-    , _availableBuildings = Rules.initialAvailableBuildings
-    , _quarryStack = 8
-    , _colonistShip = 0
-    , _colonistSupply = 0
-    , _eventLog = []
-    }
- where
-  player pIx =
-    newPlayer
-      & doubloons .~ (numPlayers - 1)
-      & tiles .~ [newTile (PlantationTile (Rules.startingPlantation numPlayers pIx))]
-  roles = S.fromList [Builder, Mayor, Settler]
+newGame :: Int -> Maybe GameState
+newGame numPlayers = do
+  plantationStack <- Rules.initPlantationStack numPlayers
+  let roles = S.fromList [Builder, Mayor, Settler]
+  return $
+    GameState
+      { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
+      , _gamePlayers = mapMaybe (newPlayer numPlayers) [0 .. numPlayers - 1]
+      , _faceUpPlantations = []
+      , _plantationStack = plantationStack
+      , _currentMayor = Index 0
+      , _availableBuildings = M.fromList Rules.initialAvailableBuildings
+      , _quarryStack = 8
+      , _colonistShip = 0
+      , _colonistSupply = 0
+      , _eventLog = []
+      }
 
 makeLenses ''GameState
 
 -- | Focus on the player at a zero-based index.
 playerL :: Index Player -> Traversal' GameState Player
-playerL (Index playerIx) = players . ix playerIx
+playerL (Index playerIx) = gamePlayers . ix playerIx
 
 -- | Read the number of players in the game.
 numPlayersL :: SimpleGetter GameState Int
-numPlayersL = to $ length . _players
+numPlayersL = to $ length . _gamePlayers
 
 totalHolesL :: SimpleGetter GameState Int
-totalHolesL = to $ sum . fmap (^. numHolesL) . _players
+totalHolesL = to $ sum . fmap (^. numHolesL) . _gamePlayers

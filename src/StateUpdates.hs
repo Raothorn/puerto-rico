@@ -17,6 +17,12 @@ import Rules
 import Types
 import Util
 
+endRound :: Update GameState ()
+endRound = do
+  -- Phase stack should be empty
+  numPlayers <- use numPlayersL
+  currentMayor %= mapIndex (mod numPlayers . (+ 1))
+
 resupplyColonistShip :: Update GameState ()
 resupplyColonistShip = do
   desiredColonists <- use totalHolesL
@@ -24,7 +30,7 @@ resupplyColonistShip = do
 
 takeColonistFromShip :: Update GameState ()
 takeColonistFromShip = do
-  remainingColonists <- colonistShip <%= (`subtract` 1)
+  remainingColonists <- colonistShip <%= (subtract 1)
   when (remainingColonists < 0) $ liftErr NoColonistRemainingOnShip
 
 -- | Remove a quarry from the stack, failing when the stack is empty.
