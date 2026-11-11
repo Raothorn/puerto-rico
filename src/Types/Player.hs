@@ -17,6 +17,7 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
+import Rules
 import Types.Building
 import Types.Index
 import Types.Tile
@@ -40,9 +41,9 @@ newPlayer =
 makeLenses ''Player
 
 numHolesL :: SimpleGetter Player Int
-numHolesL = to numHoles
+numHolesL = to (sum . map numHoles . _buildings)
  where
-  numHoles = length . filter (not . (^. buildingHasColonist)) . _buildings
+  numHoles building = buildingHoles (building ^. buildingType) - (building ^. buildingColonists)
 
 buildingL :: Index Building -> Traversal' Player Building
 buildingL (Index buildingIx) = buildings . ix buildingIx

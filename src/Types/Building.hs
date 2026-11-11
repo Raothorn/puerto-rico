@@ -4,24 +4,47 @@ module Types.Building
   ( Building
   , BuildingType (..)
   , buildingType
-  , buildingHasColonist
+  , buildingColonists
   , newBuilding
   ) where
 
 import Lens.Micro.TH
 
+import Types.Tile
+
 data Building = Building
   { _buildingType :: BuildingType
-  , _buildingHasColonist :: Bool
+  , _buildingColonists :: Int
   }
   deriving (Eq, Show)
 
 data BuildingType
   = SmallIndigoPlant
+  | LargeIndigoPlant
+  | SmallSugarMill
+  | LargeSugarMill
+  | TobaccoStorage
+  | CoffeeRoaster
   | SmallMarket
-  deriving (Eq, Show)
+  | LargeMarket
+  | Hacienda
+  | ConstructionHut
+  | SmallWarehouse
+  | LargeWarehouse
+  | Hospice
+  | Office
+  | Factory
+  | University
+  | Harbor
+  | Wharf
+  | GuildHall
+  | Residence
+  | Fortress
+  | CustomsHouse
+  | CityHall
+  deriving (Eq, Ord, Show)
 
 makeLenses ''Building
 
 newBuilding :: BuildingType -> Building
-newBuilding bType = Building bType False
+newBuilding bType = Building bType 0

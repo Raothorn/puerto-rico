@@ -11,9 +11,11 @@ data Error
   | IndexNotFound
   | NoPrivilege
   | WrongPhase
+  | WrongPlayer
   | BoardTilesFull
   | NoColonistRemainingInSupply
   | NoColonistRemainingOnShip
+  | InsufficientDoubloons
   | InvalidPlantationIndex
   | TileAlreadyHasColonist
   | EmptyPhaseStack

@@ -25,14 +25,17 @@ import Lens.Micro
 import Lens.Micro.GHC ()
 import Lens.Micro.TH
 
+import qualified Data.Map as M
 import qualified Data.Set as S
 
-import Rules
+import Types.Building
 import Types.Index
 import Types.LogEvent
 import Types.Player
 import Types.Role
 import Types.Tile
+
+import qualified Rules
 
 data GamePhase
   = NewGamePhase
@@ -49,6 +52,7 @@ data GameState = GameState
   , _plantationStack :: [Plantation]
   , -- , _plantationDiscard :: [Plantation]
     _quarryStack :: Int
+  , _availableBuildings :: M.Map BuildingType Int
   , _colonistShip :: Int
   , _colonistSupply :: Int
   , _eventLog :: [LogEvent]
@@ -65,9 +69,9 @@ newGame numPlayers =
     { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
     , _players = map player [0 .. numPlayers - 1]
     , _faceUpPlantations = []
-    , _plantationStack = initPlantationStack numPlayers
-    , -- , _plantationDiscard = []
-      _quarryStack = 8
+    , _plantationStack = Rules.initPlantationStack numPlayers
+    , _availableBuildings = Rules.initialAvailableBuildings
+    , _quarryStack = 8
     , _colonistShip = 0
     , _colonistSupply = 0
     , _eventLog = []
@@ -76,7 +80,7 @@ newGame numPlayers =
   player pIx =
     newPlayer
       & doubloons .~ (numPlayers - 1)
-      & tiles .~ [newTile (PlantationTile (startingPlantation numPlayers pIx))]
+      & tiles .~ [newTile (PlantationTile (Rules.startingPlantation numPlayers pIx))]
   roles = S.fromList [Builder, Mayor, Settler]
 
 makeLenses ''GameState

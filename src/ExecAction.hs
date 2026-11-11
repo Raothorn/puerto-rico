@@ -43,7 +43,7 @@ execAction playerIx (RoleAction roleAction) = do
     [] -> liftErr NoRemainingPlayers
     playerIx : playerIxs -> return (playerIx, playerIxs)
 
-  unless (playerIx == curPlayerIx) $ liftErr (WrongPlayer curPlayerIx playerIx)
+  unless (playerIx == curPlayerIx) $ liftErr WrongPlayer
   execRoleAction curPlayerIx hasPrivilege roleAction
 
   if null remainingPlayerIxs'
@@ -65,6 +65,12 @@ execRoleAction playerIx hasPrivilege (SettlerAction settlerAction) = do
       takeQuarry
     TakePlantationAction plantationIx -> takePlantation plantationIx
   zoom (playerL playerIx) $ placeTile tile
+
+--------------------
+-- Builder Action --
+--------------------
+execRoleAction playerix hasPrivilege (BuilderAction bType) = do
+  return ()
 
 ------------------
 -- Mayor Action --
