@@ -16,12 +16,12 @@ data Action
   = RoleAction RoleAction
   | ChooseRoleAction Role
   | ResupplyColonistShip
+  | EndRoundAction
 
 data RoleAction
   = SettlerAction SettlerAction
   | MayorAction ColonistSource ColonistPlacement
   | BuilderAction BuildingType
-  | OptOut
 
 data SettlerAction
   = TakeQuarryAction

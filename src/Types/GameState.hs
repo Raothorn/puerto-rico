@@ -4,6 +4,8 @@
 module Types.GameState
   ( GameState
   , GamePhase (..)
+  , RoundPhase (..)
+  , RolePhase (..)
   , newGame
   -- Lenses
   , eventLog
@@ -11,7 +13,7 @@ module Types.GameState
   , colonistShip
   , currentMayor
   , quarryStack
-  , phaseStack
+  , gamePhase
   , plantationStack
   , gamePlayers
   , playerL
@@ -40,15 +42,24 @@ import Types.Tile
 import qualified Rules
 
 data GamePhase
-  = NewGamePhase
-  | RoleActionPhase Role [Index Player]
-  | ChooseRolePhase (S.Set Role) [Index Player]
-  | ColonistShipResupplyPhase
-  | NoPhase
+  = InRound [Role] [Index Player] RoundPhase
+  | GameOver
   deriving (Eq, Show)
 
+data RoundPhase
+  = ChoosingRole
+  | ResolvingRole RolePhase [Index Player]
+  deriving (Eq, Show)
+
+data RolePhase
+  = ResolvingSettler
+  | ResolvingBuilder
+  deriving (Eq, Show)
+
+-- data SettlerPhase = SettlerPhase
+
 data GameState = GameState
-  { _phaseStack :: [GamePhase]
+  { _gamePhase :: GamePhase
   , _gamePlayers :: [Player]
   , _faceUpPlantations :: [Plantation]
   , _plantationStack :: [Plantation]
@@ -69,10 +80,10 @@ data GameState = GameState
 newGame :: Int -> Maybe GameState
 newGame numPlayers = do
   plantationStack <- Rules.initPlantationStack numPlayers
-  let roles = S.fromList [Builder, Mayor, Settler]
+  let roles = [Builder, Mayor, Settler]
   return $
     GameState
-      { _phaseStack = [ChooseRolePhase roles (map Index [0 .. numPlayers - 1])]
+      { _gamePhase = InRound roles (map Index [0 .. numPlayers - 1]) $ ChoosingRole
       , _gamePlayers = mapMaybe (newPlayer numPlayers) [0 .. numPlayers - 1]
       , _faceUpPlantations = []
       , _plantationStack = plantationStack

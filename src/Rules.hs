@@ -7,6 +7,7 @@ module Rules
   , isBuildingLarge
   , buildingCost
   , buildingHoles
+  , gameRoles
   )
 where
 
@@ -14,6 +15,7 @@ import Data.List (lookup, (!?), (\\))
 import Data.Maybe
 
 import Types.Building
+import Types.Role
 import Types.Tile
 
 boardTileSlots :: Int
@@ -93,3 +95,9 @@ buildingInfo =
   , (CustomsHouse, 10, 1)
   , (CityHall, 10, 1)
   ]
+
+gameRoles :: Int -> Maybe [Role]
+gameRoles 3 = Just [Builder, Settler, Mayor, Craftsman, Trader]
+gameRoles 4 = Just [Builder, Settler, Mayor, Craftsman, Trader, Prospector, Prospector]
+gameRoles 5 = Just [Builder, Settler, Mayor, Craftsman, Trader, Prospector, Prospector]
+gameRoles _ = Nothing

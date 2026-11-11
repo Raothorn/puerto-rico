@@ -4,8 +4,6 @@ module StateUpdates
   , resupplyColonistShip
   , placeTile
   , placeColonist
-  , popPhase
-  , pushPhase
   )
 where
 
@@ -16,12 +14,6 @@ import Lens.Micro.Mtl
 import Rules
 import Types
 import Util
-
-endRound :: Update GameState ()
-endRound = do
-  -- Phase stack should be empty
-  numPlayers <- use numPlayersL
-  currentMayor %= mapIndex (mod numPlayers . (+ 1))
 
 resupplyColonistShip :: Update GameState ()
 resupplyColonistShip = do
@@ -72,17 +64,3 @@ placeBuilding bType = do
   numBuildings <- use $ buildings . to length
   when (numBuildings >= 12) $ liftErr BuildingSlotsFull
   buildings %= (newBuilding bType :)
-
--- | Remove and return the current phase, failing when the stack is empty.
-popPhase :: Update GameState GamePhase
-popPhase = do
-  curPhaseStack <- use phaseStack
-  case curPhaseStack of
-    [] -> liftErr EmptyPhaseStack
-    curPhase : remainingPhases -> do
-      phaseStack .= remainingPhases
-      return curPhase
-
--- | Make a phase the current phase by pushing it onto the stack.
-pushPhase :: GamePhase -> Update GameState ()
-pushPhase phase = phaseStack %= (phase :)

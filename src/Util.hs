@@ -7,6 +7,7 @@ module Util
   , useMaybe
   , logEvent
   , removeAt
+  , rotateLeft
   )
 where
 
@@ -52,3 +53,6 @@ removeAt (Index i) xs
       case splitAt i xs of
         (before, x : after) -> Just (x, before ++ after)
         (_, []) -> Nothing
+
+rotateLeft :: Int -> [a] -> [a]
+rotateLeft n xs = drop n xs ++ take n xs
